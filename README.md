@@ -47,9 +47,7 @@ This project runs natively as a static web application without build tools.
 
 1. Clone the repository:
 ```bash
-git clone [[https://github.com/ваш-логин/github-analyzer.git]([https://dartur0.github.io/github-analyzer/
-)](https://github.com/ваш-логин/github-analyzer.git](https://dartur0.github.io/github-analyzer/
-))
+git clone https://github.com/dartur0/github-profile-explorer.git
 cd github-analyzer
 
 ```
