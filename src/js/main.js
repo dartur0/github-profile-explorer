@@ -1,36 +1,41 @@
 async function getUser(username) {
-  try {
-    const response = await fetch(`https://api.github.com/users/${username}`);
-    if (!response.ok) throw new Error("User not found");
-    return await response.json();
-  } catch (error) {
-    console.error("Error:", error.message);
-    return null;
+  const response = await fetch(`https://api.github.com/users/${username}`);
+  
+  if (!response.ok) {
+    if (response.status === 404) {
+      throw new Error(`User "${username}" not found`);
+    }
+    if (response.status === 403) {
+      throw new Error("GitHub API rate limit exceeded. Please try again later.");
+    }
+    throw new Error("Failed to fetch profile data");
   }
+  return await response.json();
 }
 
 async function getRepos(username) {
-  try {
-    const response = await fetch(
-      `https://api.github.com/users/${username}/repos?sort=updated&per_page=100`,
-    );
-    if (!response.ok) throw new Error("Could not fetch repositories");
-    return await response.json();
-  } catch (error) {
-    console.error("Error:", error.message);
-    return [];
+  const response = await fetch(
+    `https://api.github.com/users/${username}/repos?sort=updated&per_page=100`
+  );
+
+  if (!response.ok) {
+    if (response.status === 403) {
+      throw new Error("GitHub API rate limit exceeded.");
+    }
+    throw new Error("Could not fetch repositories");
   }
+  return await response.json();
 }
 
 async function getLanguageStats(repos) {
   const totals = {};
-
   const topRepos = repos.slice(0, 10);
 
   for (const repo of topRepos) {
     if (!repo.languages_url) continue;
     try {
       const response = await fetch(repo.languages_url);
+      if (response.status === 403) break; 
       if (!response.ok) continue;
 
       const languages = await response.json();
@@ -42,6 +47,21 @@ async function getLanguageStats(repos) {
     }
   }
   return totals;
+}
+
+function showError(message) {
+  const resultDiv = document.getElementById("profile-result");
+  resultDiv.innerHTML = `
+    <div class="profile-card error-card">
+      <h2>Oops!</h2>
+      <p class="bio">${message}</p>
+    </div>
+  `;
+  
+  currentLanguageData = null;
+  animationProgress = 0;
+  redraw();
+  document.getElementById("chart-legend").innerHTML = '';
 }
 
 function calculateLanguagePercentages(totals) {
@@ -130,18 +150,35 @@ searchForm.addEventListener("submit", async function (event) {
   currentLanguageData = null;
   animationProgress = 0;
 
-  const user = await getUser(username);
-  const repos = await getRepos(username);
+  try {
+    const user = await getUser(username);
+    const repos = await getRepos(username);
 
-  displayProfile(user, repos);
+    if (repos.length === 0) {
+      displayProfile(user, []);
+      document.getElementById("chart-container").style.display = "none";
+      document.getElementById("chart-legend").innerHTML = 
+        '<p style="color: var(--text-muted); text-align: center;">This user has no public repositories to analyze.</p>';
+      return;
+    }
 
-  if (user && repos.length > 0) {
+    document.getElementById("chart-container").style.display = "flex";
+    displayProfile(user, repos);
+
     const languageTotals = await getLanguageStats(repos);
     currentLanguageData = calculateLanguagePercentages(languageTotals);
 
-    animationProgress = 0;
-    loop();
-    renderHTMLLegend(currentLanguageData);
+    if (Object.keys(currentLanguageData).length === 0) {
+      document.getElementById("chart-legend").innerHTML = 
+        '<p style="color: var(--text-muted); text-align: center;">Could not detect programming languages in repositories.</p>';
+    } else {
+      animationProgress = 0;
+      loop();
+      renderHTMLLegend(currentLanguageData);
+    }
+
+  } catch (error) {
+    showError(error.message);
   }
 });
 

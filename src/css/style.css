@@ -274,3 +274,11 @@ main {
     transform: translateY(0);
   }
 }
+
+.error-card {
+  border-color: rgba(242, 141, 141, 0.4);
+}
+
+.error-card h2 {
+  color: #f28d8d;
+}
