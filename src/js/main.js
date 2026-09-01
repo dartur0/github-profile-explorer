@@ -116,14 +116,19 @@ function displayProfile(user, repos) {
   `;
 }
 
-const searchButton = document.getElementById("search-btn");
+const searchForm = document.getElementById("search-form");
 const usernameInput = document.getElementById("username-input");
 
-searchButton.addEventListener("click", async function () {
+searchForm.addEventListener("submit", async function (event) {
+  event.preventDefault();
+
   const username = usernameInput.value.trim();
   if (!username) return;
 
-  document.getElementById("profile-result").innerHTML = "<p>Loading...</p>";
+  document.getElementById("profile-result").innerHTML = '<div class="spinner"></div>';
+  document.getElementById("chart-legend").innerHTML = '';
+  currentLanguageData = null;
+  animationProgress = 0;
 
   const user = await getUser(username);
   const repos = await getRepos(username);
@@ -133,48 +138,59 @@ searchButton.addEventListener("click", async function () {
   if (user && repos.length > 0) {
     const languageTotals = await getLanguageStats(repos);
     currentLanguageData = calculateLanguagePercentages(languageTotals);
-    redraw();
+
+    animationProgress = 0;
+    loop();
     renderHTMLLegend(currentLanguageData);
   }
 });
 
 let currentLanguageData = null;
+let animationProgress = 0;
 
 const pieColors = [
-  [232, 160, 191],
-  [107, 122, 153],
-  [143, 166, 201],
-  [201, 123, 156],
-  [237, 225, 229],
-  [76, 92, 119],
+  [242, 166, 141], 
+  [232, 180, 184], 
+  [224, 201, 162], 
+  [245, 213, 190], 
+  [214, 147, 147], 
+  [196, 165, 186]
 ];
 
 window.setup = function () {
   const canvas = createCanvas(400, 400);
   canvas.parent("chart-container");
-  noLoop();
 };
 
 window.draw = function () {
-  background(31, 36, 56);
+  background(34, 27, 32);
 
   if (!currentLanguageData || Object.keys(currentLanguageData).length === 0) {
-    fill(255);
+    fill(196, 181, 184);
     textAlign(CENTER, CENTER);
+    textSize(14);
     text("No language data available", width / 2, height / 2);
     return;
+  }
+
+  if (animationProgress < 1) {
+    animationProgress = lerp(animationProgress, 1, 0.08);
   }
 
   const centerX = width / 2;
   const centerY = height / 2;
   const radius = 130;
 
-  let startAngle = 0;
+  let startAngle = -HALF_PI;
   let colorIndex = 0;
+
+  const maxTotalAnfle = TWO_PI * animationProgress;
 
   for (const lang in currentLanguageData) {
     const percentage = currentLanguageData[lang];
-    const angleSize = (percentage / 100) * TWO_PI;
+    const targetAngelSize = ((percentage / 100) * TWO_PI);
+
+    const angleSize = targetAngelSize * animationProgress;
     const endAngle = startAngle + angleSize;
 
     const color = pieColors[colorIndex % pieColors.length];
