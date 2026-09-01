@@ -200,8 +200,8 @@ window.setup = function () {
 };
 
 window.draw = function () {
-  background(34, 27, 32);
-
+  clear();
+  
   if (!currentLanguageData || Object.keys(currentLanguageData).length === 0) {
     fill(196, 181, 184);
     textAlign(CENTER, CENTER);
