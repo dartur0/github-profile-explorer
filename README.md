@@ -2,7 +2,7 @@
 
 An interactive web application for analyzing GitHub user profiles, exploring public repositories, and visualizing language statistics in real time.
 
-https://dartur0.github.io/github-analyzer/
+https://dartur0.github.io/github-profile-explorer/
 
 ## Features
 
