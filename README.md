@@ -2,7 +2,7 @@
 
 An interactive web application for analyzing GitHub user profiles, exploring public repositories, and visualizing language statistics in real time.
 
-[Live Demo](https://dartur0.github.io/github-analyzer/)
+https://dartur0.github.io/github-analyzer/
 
 ## Features
 
@@ -47,7 +47,9 @@ This project runs natively as a static web application without build tools.
 
 1. Clone the repository:
 ```bash
-git clone [https://github.com/ваш-логин/github-analyzer.git](https://github.com/ваш-логин/github-analyzer.git)
+git clone [[https://github.com/ваш-логин/github-analyzer.git]([https://dartur0.github.io/github-analyzer/
+)](https://github.com/ваш-логин/github-analyzer.git](https://dartur0.github.io/github-analyzer/
+))
 cd github-analyzer
 
 ```
